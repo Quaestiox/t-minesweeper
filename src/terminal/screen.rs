@@ -12,6 +12,8 @@ use crossterm::{
     terminal::{self, Clear, ClearType, enable_raw_mode},
 };
 
+use super::input::input;
+
 pub struct Screen {
     width: u16,
     height: u16,
@@ -31,6 +33,14 @@ impl Screen {
         self.clear_screen().unwrap();
         self.set_pos(0, 0).unwrap();
         self.welcome().unwrap();
+        stdout().flush();
+        loop {
+            if input() == "enter".to_string() {
+                break;
+            }
+        }
+        self.clear_screen().unwrap();
+        self.set_pos(0, 0).unwrap();
     }
 
     pub fn clear_screen(&self) -> Result<(), Error> {
@@ -62,6 +72,24 @@ impl Screen {
         self.print("mineswapper".to_string())?;
         self.print("\n\n\n\n".to_string())?;
         self.print("press enter to start game!\n".to_string())?;
+        Ok(())
+    }
+
+    pub fn success(&self) -> Result<(), Error> {
+        self.clear_screen()?;
+        self.set_pos(0, 0)?;
+        self.print("success".to_string())?;
+        self.print("\n\n\n\n".to_string())?;
+        stdout().flush()?;
+        Ok(())
+    }
+
+    pub fn die(&self) -> Result<(), Error> {
+        self.clear_screen()?;
+        self.set_pos(0, 0)?;
+        self.print("You Die !!!!!".to_string())?;
+        self.print("\n\n\n\n".to_string())?;
+        stdout().flush()?;
         Ok(())
     }
 }

@@ -7,6 +7,7 @@ use std::{
 use crate::terminal::{self, screen::Screen};
 
 use super::cfg::Config;
+use colored::Colorize;
 use crossterm::{
     event::{self, Event, KeyCode, KeyEvent, KeyModifiers, read},
     style::Stylize,
@@ -80,13 +81,13 @@ impl Game {
                     .as_str()
         };
         h.push(' ');
-        h.push('y');
+        h.push('Y');
         h.push('\n');
-
-        self.screen.print(h).unwrap();
+        let color_h = h.dark_red().to_string();
+        self.screen.print(color_h).unwrap();
 
         for i in 0..cfg.row {
-            let mut line = (i + 1).to_string();
+            let mut line = (i + 1).to_string().dark_blue().to_string();
             if i + 1 < 10 {
                 line.push(' ');
             }
@@ -107,7 +108,7 @@ impl Game {
             self.screen.print(line).unwrap();
         }
 
-        self.screen.print("x\n\n".to_string()).unwrap();
+        self.screen.print("X\n\n".dark_blue().to_string()).unwrap();
     }
 
     fn generate_mine(&mut self) {
@@ -152,50 +153,54 @@ impl Game {
     pub fn run(&mut self) {
         let cfg = self.config;
         loop {
-            self.screen.print("input x: ".to_string()).unwrap();
-            stdout().flush().unwrap();
+            self.gprint("Input X: ");
             let mut input1 = String::new();
             io::stdin().read_line(&mut input1).unwrap();
             let x;
             match input1.trim().parse::<i32>() {
-                Ok(num) => x = num,
+                Ok(num) => x = num - 1,
                 Err(_) => {
-                    self.screen
-                        .print("please input a number\n".to_string())
-                        .unwrap();
-                    stdout().flush().unwrap();
+                    self.gprint("please input a number\n");
                     continue;
                 }
             };
 
-            self.screen.print("input y: ".to_string()).unwrap();
-            stdout().flush().unwrap();
+            self.gprint("Input Y: ");
+
             let mut input2 = String::new();
             io::stdin().read_line(&mut input2).unwrap();
             let y;
-            match input1.trim().parse::<i32>() {
-                Ok(num) => y = num,
+            match input2.trim().parse::<i32>() {
+                Ok(num) => y = num - 1,
                 Err(_) => {
-                    self.screen
-                        .print("please input a number\n".to_string())
-                        .unwrap();
-                    stdout().flush().unwrap();
+                    self.gprint("please input a number\n");
                     continue;
                 }
             };
 
-            if x > 0 && x < cfg.row as i32 && y > 0 && y < cfg.col as i32 {
-                if self.board[x as usize][y as usize] {
-                    self.gprint("already exploded");
-                    continue;
+            if x >= 0 && x < cfg.row as i32 && y >= 0 && y < cfg.col as i32 {
+                match self.world[x as usize][y as usize] {
+                    Item::Mine => {
+                        self.screen.die().unwrap();
+                        break;
+                    }
+                    Item::Number(num) => {
+                        if self.board[x as usize][y as usize] {
+                            self.gprint("already exploded\n");
+                            continue;
+                        }
+                        self.board[x as usize][y as usize] = true;
+                        self.spread(x, y);
+                    }
+                    _ => (),
                 }
-                self.board[x as usize][y as usize] = true;
             } else {
-                self.screen
-                    .print("please input a number\n".to_string())
-                    .unwrap();
-                stdout().flush().unwrap();
-                continue;
+                self.gprint("invalid number\n");
+            }
+
+            if self.judge() {
+                self.screen.success().unwrap();
+                break;
             }
             self.screen.clear_screen().unwrap();
             self.draw();
@@ -207,45 +212,63 @@ impl Game {
         stdout().flush().unwrap();
     }
 
-    pub fn input(&mut self) -> String {
-        loop {
-            if let Ok(event) = read() {
-                match event {
-                    Event::Key(key_event) => match key_event {
-                        KeyEvent {
-                            code,
-                            modifiers,
-                            kind,
-                            state,
-                        } => match code {
-                            KeyCode::Char(c) => match c {
-                                'q' if modifiers == KeyModifiers::CONTROL => {
-                                    exit(0);
-                                    self.shut_down = true;
+    pub fn spread(&mut self, i: i32, j: i32) {
+        let direction: [i32; 3] = [-1, 0, 1];
+        let Config { col, row, .. } = self.config;
+        for x in 0..3 {
+            for y in 0..3 {
+                //                if x != 1 || y != 1 {
+                let px = i as i32 + direction[x];
+                let py = j as i32 + direction[y];
 
-                                    return "quit".to_string();
+                if px >= 0 && px < row as i32 && py >= 0 && py < col as i32 {
+                    match self.world[px as usize][py as usize] {
+                        Item::Number(num) => {
+                            if num == 0 {
+                                if !self.board[px as usize][py as usize] {
+                                    self.board[px as usize][py as usize] = true;
+                                    self.spread(px, py);
                                 }
-                                //                                '1'..='9' => return c,
-                                _ => (),
-                            },
-                            KeyCode::Enter => return "enter".to_string(),
-
-                            _ => (),
-                        },
-                    },
-                    _ => (),
+                            } else {
+                                if !self.board[px as usize][py as usize] {
+                                    self.board[px as usize][py as usize] = true;
+                                }
+                            }
+                        }
+                        _ => (),
+                    }
                 }
+                //               }
             }
         }
     }
 
     pub fn handle(&mut self, c: char) {}
+
+    pub fn judge(&self) -> bool {
+        let mut count = 0;
+        let cfg = &self.config;
+        let board = &self.board;
+        for i in 0..cfg.row {
+            for j in 0..cfg.col {
+                if board[i][j] {
+                    count += 1;
+                }
+            }
+        }
+        if (cfg.col * cfg.row) - count == cfg.mine as usize {
+            return true;
+        }
+        false
+    }
 }
 
 impl Item {
     pub fn render(&self) -> char {
         match self {
             Item::Space => '·',
+
+            Item::Number(0) => ' ',
             Item::Number(num) => num.to_string().chars().next().unwrap(),
             Item::Mine => 'X',
         }
