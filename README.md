@@ -14,8 +14,9 @@ Minesweeper game in the terminal.
 
 ## Run the game
 
+
 ```cmd
-git@github.com:Quaestiox/t-minesweeper.github
+git clone https://github.com/Quaestiox/t-minesweeper.git
 cd t-minesweeper
 cargo run
 ```
