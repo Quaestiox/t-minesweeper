@@ -30,8 +30,8 @@ impl Config {
     }
     pub fn hard() -> Self {
         Self {
-            col: 16,
-            row: 30,
+            col: 30,
+            row: 16,
             mine: 99,
         }
     }

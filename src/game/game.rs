@@ -57,7 +57,7 @@ impl Game {
         stdout().flush();
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&self, all: bool) {
         let cfg = &self.config;
         let world = &self.world;
         let board = &self.board;
@@ -98,7 +98,7 @@ impl Game {
 
             for j in 0..cfg.col {
                 let c;
-                if !board[i][j] {
+                if !board[i][j] && !all {
                     c = '·';
                 } else {
                     c = world[i][j].render();
@@ -185,6 +185,10 @@ impl Game {
             if x >= 0 && x < cfg.row as i32 && y >= 0 && y < cfg.col as i32 {
                 match self.world[x as usize][y as usize] {
                     Item::Mine => {
+                        self.screen.clear_screen();
+                        self.screen.set_pos(0, 0);
+
+                        self.draw(true);
                         self.screen.die().unwrap();
                         break;
                     }
@@ -204,11 +208,15 @@ impl Game {
 
             if self.judge() {
                 let dura = start.elapsed();
+                self.screen.clear_screen();
+                self.screen.set_pos(0, 0);
+
+                self.draw(true);
                 self.screen.success(dura).unwrap();
                 break;
             }
             self.screen.clear_screen().unwrap();
-            self.draw();
+            self.draw(false);
         }
     }
 
