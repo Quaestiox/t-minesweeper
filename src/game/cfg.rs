@@ -35,7 +35,7 @@ impl Config {
             mine: 99,
         }
     }
-    pub fn default() -> Self {
+    pub fn custom() -> Self {
         Self {
             col: 11,
             row: 11,

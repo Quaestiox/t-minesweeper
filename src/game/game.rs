@@ -23,6 +23,7 @@ enum Item {
 }
 
 pub struct Game {
+    first: bool,
     screen: Screen,
     config: Config,
     world: Vec<Vec<Item>>,
@@ -39,6 +40,7 @@ impl Game {
         let board: Vec<Vec<bool>> = vec![vec![false; cfg.col]; cfg.row];
 
         Self {
+            first: true,
             screen: screen,
             config: cfg,
             world: world,
@@ -117,11 +119,37 @@ impl Game {
     fn generate_mine(&mut self) {
         let Config { col, row, mine } = self.config;
         let mut rng = rand::thread_rng();
-        for _ in 0..mine {
+        let mut i = 0;
+        while i < mine {
             let rd_col = rng.gen_range(0..col);
             let rd_row = rng.gen_range(0..row);
+
             if let Item::Space = self.world[rd_row][rd_col] {
                 self.world[rd_row][rd_col] = Item::Mine;
+                i += 1;
+            } else {
+                continue;
+            }
+        }
+    }
+
+    fn generate_mine_by_pos(&mut self, p_col: usize, p_row: usize) {
+        let Config { col, row, mine } = self.config;
+        let mut rng = rand::thread_rng();
+        let mut rd_col;
+        let mut rd_row;
+
+        let mut i = 0;
+        while i < mine {
+            rd_col = rng.gen_range(0..col);
+            rd_row = rng.gen_range(0..row);
+            if rd_col != p_col || rd_row != p_row {
+                if let Item::Space = self.world[rd_row][rd_col] {
+                    self.world[rd_row][rd_col] = Item::Mine;
+                    i += 1;
+                } else {
+                    continue;
+                }
             }
         }
     }
@@ -181,6 +209,13 @@ impl Game {
                     continue;
                 }
             };
+
+            if self.first {
+                self.world = vec![vec![Item::Space; cfg.col]; cfg.row];
+                self.generate_mine_by_pos(x as usize, y as usize);
+                self.generate_number();
+                self.first = false;
+            }
 
             if x >= 0 && x < cfg.row as i32 && y >= 0 && y < cfg.col as i32 {
                 match self.world[x as usize][y as usize] {
@@ -255,8 +290,6 @@ impl Game {
             }
         }
     }
-
-    pub fn handle(&mut self, c: char) {}
 
     pub fn judge(&self) -> bool {
         let mut count = 0;

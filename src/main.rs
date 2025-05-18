@@ -21,11 +21,11 @@ fn main() {
         game.draw(false);
         game.run();
         let str = input();
-        if str == "c".to_string() {
-            screen.clear_screen().unwrap();
-            screen.set_pos(0, 0).unwrap();
-            stdout().flush().unwrap();
+        screen.clear_screen().unwrap();
+        screen.set_pos(0, 0).unwrap();
+        stdout().flush().unwrap();
 
+        if str == "c".to_string() {
             continue;
         } else if str == "q".to_string() {
             break;
