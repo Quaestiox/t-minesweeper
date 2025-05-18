@@ -1,4 +1,4 @@
-T-MineSweeper
+# T-MineSweeper
 
 Minesweeper game in the terminal.
 
@@ -8,7 +8,7 @@ Minesweeper game in the terminal.
 ![pic_2](pic/pic_2.png)
 
 
-# Run
+## Run
 
 ```cmd
 cargo run
