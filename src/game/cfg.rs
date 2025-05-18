@@ -14,11 +14,32 @@ impl Config {
         }
     }
 
-    pub fn Default() -> Self {
+    pub fn easy() -> Self {
+        Self {
+            col: 8,
+            row: 8,
+            mine: 10,
+        }
+    }
+    pub fn normal() -> Self {
+        Self {
+            col: 16,
+            row: 16,
+            mine: 40,
+        }
+    }
+    pub fn hard() -> Self {
+        Self {
+            col: 16,
+            row: 30,
+            mine: 99,
+        }
+    }
+    pub fn default() -> Self {
         Self {
             col: 11,
             row: 11,
-            mine: 10,
+            mine: 2,
         }
     }
 }

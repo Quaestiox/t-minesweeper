@@ -2,9 +2,10 @@ use std::{
     io::{self, Read, Write, stdout},
     process::exit,
     string,
+    time::Instant,
 };
 
-use crate::terminal::{self, screen::Screen};
+use crate::terminal::{self, input::input, screen::Screen};
 
 use super::cfg::Config;
 use colored::Colorize;
@@ -22,7 +23,6 @@ enum Item {
 }
 
 pub struct Game {
-    shut_down: bool,
     screen: Screen,
     config: Config,
     world: Vec<Vec<Item>>,
@@ -39,7 +39,6 @@ impl Game {
         let board: Vec<Vec<bool>> = vec![vec![false; cfg.col]; cfg.row];
 
         Self {
-            shut_down: false,
             screen: screen,
             config: cfg,
             world: world,
@@ -48,10 +47,14 @@ impl Game {
     }
 
     pub fn init(&mut self) {
-        self.screen.init();
+        //        self.screen.init();
+    }
 
+    pub fn one(&mut self) {
         self.generate_mine();
         self.generate_number();
+        self.screen.clear_screen();
+        stdout().flush();
     }
 
     pub fn draw(&self) {
@@ -151,6 +154,7 @@ impl Game {
     }
 
     pub fn run(&mut self) {
+        let start = Instant::now();
         let cfg = self.config;
         loop {
             self.gprint("Input X: ");
@@ -199,7 +203,8 @@ impl Game {
             }
 
             if self.judge() {
-                self.screen.success().unwrap();
+                let dura = start.elapsed();
+                self.screen.success(dura).unwrap();
                 break;
             }
             self.screen.clear_screen().unwrap();

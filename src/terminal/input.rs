@@ -9,9 +9,9 @@ use crossterm::{
 };
 
 pub fn input() -> String {
-    let mut buffer = [0; 1024];
-    io::stdin().read(&mut buffer).ok();
-    let f = true;
+    //    let mut buffer = [0; 1024];
+    //   io::stdin().read(&mut buffer).ok();
+    //    let f = true;
     enable_raw_mode().unwrap();
     let mut res = String::new();
     loop {
@@ -24,20 +24,11 @@ pub fn input() -> String {
                         kind,
                         state,
                     } => match code {
-                        KeyCode::Char(c) => match c {
-                            'q' if modifiers == KeyModifiers::CONTROL => {
-                                res = "quit".to_string();
-                                break;
-                            }
-                            //                                '1'..='9' => return c,
-                            _ => (),
-                        },
-                        KeyCode::Enter => {
-                            println!("Enter detected");
-                            res = "enter".to_string();
+                        KeyCode::Char(c) => {
+                            res = c.to_string();
                             break;
                         }
-
+                        KeyCode::Enter => (),
                         _ => (),
                     },
                 },
