@@ -156,6 +156,9 @@ impl Screen {
             } else if ch == "h".to_string() {
                 cfg = Config::hard();
                 break;
+            } else if ch == "m".to_string() {
+                cfg = Config::custom();
+                break;
             }
         }
         cfg

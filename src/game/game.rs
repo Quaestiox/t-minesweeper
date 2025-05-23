@@ -105,7 +105,8 @@ impl Game {
                 } else {
                     c = world[i][j].render();
                 }
-                line.push(c);
+                let color_c = render_color(c);
+                line += color_c.as_str();
                 line.push(' ');
                 line.push(' ');
             }
@@ -214,8 +215,9 @@ impl Game {
                 self.world = vec![vec![Item::Space; cfg.col]; cfg.row];
                 self.generate_mine_by_pos(x as usize, y as usize);
                 self.generate_number();
-                self.first = false;
             }
+
+            self.first = false;
 
             if x >= 0 && x < cfg.row as i32 && y >= 0 && y < cfg.col as i32 {
                 match self.world[x as usize][y as usize] {
@@ -318,5 +320,22 @@ impl Item {
             Item::Number(num) => num.to_string().chars().next().unwrap(),
             Item::Mine => 'X',
         }
+    }
+}
+
+fn render_color(c: char) -> String {
+    match c {
+        '1' => '1'.to_string().blue().to_string(),
+        '2' => '2'.to_string().dark_green().to_string(),
+        '3' => '3'.to_string().dark_red().to_string(),
+        '4' => '4'.to_string().dark_blue().to_string(),
+        '5' => '5'.to_string().to_string().dark_yellow().to_string(),
+        '6' => '6'.to_string().dark_cyan().to_string(),
+        '7' => '7'.to_string().black().to_string(),
+        '8' => '8'.to_string().grey().to_string(),
+        '·' => '·'.to_string().white().to_string(),
+        'X' => 'X'.to_string().dark_magenta().to_string(),
+        ' ' => ' '.to_string(),
+        _ => "".to_string(),
     }
 }

@@ -37,9 +37,9 @@ impl Config {
     }
     pub fn custom() -> Self {
         Self {
-            col: 11,
-            row: 11,
-            mine: 2,
+            col: 8,
+            row: 8,
+            mine: 63,
         }
     }
 }
