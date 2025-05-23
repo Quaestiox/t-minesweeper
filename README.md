@@ -6,12 +6,6 @@ Minesweeper game in the terminal.
 
 ![pic_2](pic/pic_2.png)
 
-![pic_3](pic/pic_3.png)
-
-![pic_4](pic/pic_4.png)
-
-![pic_5](pic/pic_5.png)
-
 ## Run the game
 
 
